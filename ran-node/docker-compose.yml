@@ -38,11 +38,11 @@ services:
     environment:
       - PORT=7777
       - MONGO_URI=mongodb://o5gs-mongo/open5gs
-      - CONFIG_HOST_DIR=/root/5G-lab/ran-node/configs
+      # CONFIG_HOST_DIR : PC 마다 다르게 설정
+      - CONFIG_HOST_DIR=/home/givensik/Core-Testbed/ran-node/configs 
       - CONFIG_MOUNT_DIR=/configs
       - RAN_NETWORK=core-node_5gnet
       - UERANSIM_IMAGE=ueransim-base
-      # - MONGO_URI=mongodb://o5gs-mongo/open5gs # core-node의 mongo와 연결
 
 
 networks:

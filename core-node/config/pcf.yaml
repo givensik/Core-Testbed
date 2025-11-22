@@ -9,6 +9,8 @@ pcf:
     server:
       - address: 0.0.0.0   # 컨테이너 내부의 모든 IP에서 수신 (필수!)
         port: 7777
+        advertise : o5gs-pcf  # Docker 네트워크상의 PCF 주소
+      
     client:
       # nrf:
       #   - uri: http://o5gs-nrf:7777  # Docker 네트워크상의 NRF 주소
