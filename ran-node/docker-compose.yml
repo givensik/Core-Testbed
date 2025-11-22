@@ -2,23 +2,29 @@ version: "3.8"
 
 services:
   gnb:
-    image: ueransim-base
+    build:
+      context: .
+      dockerfile: Dockerfile.ueransim
     container_name: ran-gnb
     command: ["nr-gnb", "-c", "/config/gnb.yaml"]
     volumes:
       - ./configs/gnb.yaml:/config/gnb.yaml
     networks:
       - 5gnet
+      - rannet
     privileged: true
 
   ue:
-    image: ueransim-base
+    build:
+      context: .
+      dockerfile: Dockerfile.ueransim
     container_name: ran-ue
     command: ["nr-ue", "-c", "/config/ue.yaml"]
     volumes:
       - ./configs/ue.yaml:/config/ue.yaml
     networks:
-      - 5gnet
+      # - 5gnet
+      - rannet
     privileged: true
     depends_on:
       - gnb
@@ -35,6 +41,7 @@ services:
       - "0.0.0.0:7777:7777"
     networks:
       - 5gnet
+      - rannet
     environment:
       - PORT=7777
       - MONGO_URI=mongodb://o5gs-mongo/open5gs
@@ -49,3 +56,5 @@ networks:
   5gnet:
     external: true
     name: core-node_5gnet
+  rannet:
+    driver: bridge
