@@ -56,6 +56,25 @@
       <div id="form-status"></div>
     </section>
 
+    <section>
+      <h2>Batch Create UE Containers</h2>
+      <form id="batch-ue-form">
+        <table id="batch-ue-table">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>IMSI</th>
+              <th>Container</th>
+              <th>gNB</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button type="submit">Create Selected UEs</button>
+      </form>
+      <div id="batch-form-status"></div>
+    </section>
+
     <script>
       async function fetchUes() {
         const res = await fetch('/api/ue');
@@ -94,6 +113,23 @@
         });
       }
 
+      async function fetchBatchUes() {
+        const res = await fetch('/api/ue');
+        const data = await res.json();
+        const tbody = document.querySelector('#batch-ue-table tbody');
+        tbody.innerHTML = '';
+        data.items.forEach((ue) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><input type="checkbox" class="ue-checkbox" value="${ue.id}" /></td>
+            <td>${ue.id}</td>
+            <td class="status">${ue.containerStatus || 'missing'}</td>
+            <td>${ue.gnbName || ''}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
       document.addEventListener('click', async (event) => {
         if (event.target.classList.contains('spawn-btn')) {
           const id = event.target.dataset.id;
@@ -126,7 +162,33 @@
         }
       });
 
+      document.getElementById('batch-ue-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const checkboxes = document.querySelectorAll('.ue-checkbox:checked');
+        const imsiList = Array.from(checkboxes).map((checkbox) => checkbox.value);
+        if (imsiList.length === 0) {
+          alert('Please select at least one UE.');
+          return;
+        }
+
+        const res = await fetch('/api/ue/batch/spawn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imsiList }),
+        });
+
+        const status = document.getElementById('batch-form-status');
+        if (res.ok) {
+          status.textContent = 'Batch UE creation submitted';
+          fetchBatchUes();
+        } else {
+          const err = await res.json();
+          status.textContent = err.error || 'Failed to submit batch creation';
+        }
+      });
+
       fetchUes();
+      fetchBatchUes();
       setInterval(fetchUes, 5000);
     </script>
   </body>
